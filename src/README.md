@@ -5,7 +5,9 @@ A super simple FastAPI application that allows students to view and sign up for 
 ## Features
 
 - View all available extracurricular activities
-- Sign up for activities
+- Sign in as a student, parent, provider, or administrator
+- Sign up for and withdraw from activities according to account permissions
+- Keep public activity browsing available without an account
 
 ## Getting Started
 
@@ -30,7 +32,27 @@ A super simple FastAPI application that allows students to view and sign up for 
 | Method | Endpoint                                                          | Description                                                         |
 | ------ | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
 | GET    | `/activities`                                                     | Get all activities with their details and current participant count |
-| POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Sign up for an activity                                             |
+| POST   | `/auth/login`                                                     | Exchange an email and password for a bearer session                 |
+| POST   | `/auth/logout`                                                    | Invalidate the current bearer session                               |
+| GET    | `/auth/me`                                                        | Get the authenticated user's role and linked students               |
+| POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Sign up an authorized student for an activity                       |
+| DELETE | `/activities/{activity_name}/unregister?email=student@mergington.edu` | Withdraw an authorized student from an activity                  |
+
+Enrollment changes require an `Authorization: Bearer <token>` header. Students
+can change only their own enrollment, parents can change only linked students,
+and provider or administrator accounts can act for a specified student.
+
+### Demo Accounts
+
+| Role          | Email                        | Password    |
+| ------------- | ---------------------------- | ----------- |
+| Student       | `student@mergington.edu`      | `learn123`  |
+| Parent        | `parent@mergington.edu`       | `family123` |
+| Provider      | `teacher@mergington.edu`      | `teach123`  |
+| Administrator | `admin@mergington.edu`        | `admin123`  |
+
+User records contain salted PBKDF2 password hashes rather than plaintext
+passwords. These credentials are for local demonstration only.
 
 ## Data Model
 
@@ -47,4 +69,5 @@ The application uses a simple data model with meaningful identifiers:
    - Name
    - Grade level
 
-All data is stored in memory, which means data will be reset when the server restarts.
+All data and login sessions are stored in memory, which means they reset when
+the server restarts.
